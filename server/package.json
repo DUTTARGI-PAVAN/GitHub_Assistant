@@ -1,40 +1,40 @@
 {
   "name": "github-assistant-server",
   "version": "1.0.0",
-  "description": "Express backend for GitHub Assistant AI & RAG system",
-  "type": "module",
-  "main": "src/index.js",
+  "description": "Backend API for GitHub Knowledge Assistant",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "prisma:generate": "prisma generate --schema=./src/prisma/schema.prisma",
-    "prisma:push": "prisma db push --schema=./src/prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema=./src/prisma/schema.prisma"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node src/index.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@octokit/rest": "^20.0.2",
-    "@pinecone-database/pinecone": "^2.2.0",
     "@prisma/client": "^5.14.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "ioredis": "^5.4.1",
-    "langchain": "^0.2.0",
-    "morgan": "^1.10.0",
-    "openai": "^4.47.1",
-    "zod": "^3.23.8"
+    "express": "^4.19.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.12",
     "nodemon": "^3.1.0",
-    "prisma": "^5.14.0"
+    "prisma": "^5.14.0",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   },
   "keywords": [
     "github",
+    "ai",
     "rag",
-    "langchain",
-    "openai",
-    "pinecone",
-    "express"
+    "express",
+    "typescript",
+    "prisma",
+    "postgresql"
   ],
   "author": "",
   "license": "MIT"

@@ -1,0 +1,41 @@
+{
+  "name": "github-assistant-server",
+  "version": "1.0.0",
+  "description": "Express backend for GitHub Assistant AI & RAG system",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "prisma:generate": "prisma generate --schema=./src/prisma/schema.prisma",
+    "prisma:push": "prisma db push --schema=./src/prisma/schema.prisma",
+    "prisma:studio": "prisma studio --schema=./src/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "@pinecone-database/pinecone": "^2.2.0",
+    "@prisma/client": "^5.14.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.4.1",
+    "langchain": "^0.2.0",
+    "morgan": "^1.10.0",
+    "openai": "^4.47.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prisma": "^5.14.0"
+  },
+  "keywords": [
+    "github",
+    "rag",
+    "langchain",
+    "openai",
+    "pinecone",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT"
+}

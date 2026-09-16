@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String       @id @default(uuid())
+  email     String       @unique
+  name      String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  repos     Repository[]
+  chats     ChatSession[]
+}
+
+model Repository {
+  id          String           @id @default(uuid())
+  name        String
+  owner       String
+  fullName    String           @unique // e.g. "owner/repo"
+  url         String
+  description String?
+  branch      String           @default("main")
+  isPrivate   Boolean          @default(false)
+  status      IngestionStatus  @default(PENDING)
+  fileCount   Int              @default(0)
+  chunkCount  Int              @default(0)
+  userId      String?
+  user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tasks       IngestionTask[]
+  chats       ChatSession[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([owner, name])
+}
+
+model IngestionTask {
+  id           String          @id @default(uuid())
+  repositoryId String
+  repository   Repository      @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  status       IngestionStatus @default(PENDING)
+  progress     Int             @default(0)
+  error        String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model ChatSession {
+  id           String        @id @default(uuid())
+  title        String        @default("New Chat")
+  repositoryId String
+  repository   Repository    @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages     ChatMessage[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id            String      @id @default(uuid())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  role          MessageRole
+  content       String
+  sources       Json?       // Metadata references (file paths, line numbers, code snippets)
+  createdAt     DateTime    @default(now())
+}
+
+enum IngestionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}

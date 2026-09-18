@@ -40,8 +40,8 @@ An AI-powered full-stack assistant for analyzing, indexing, and conversing with 
 - **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Lucide Icons, Axios
 - **Backend**: Node.js, Express.js (ES Modules), LangChain, Octokit (GitHub REST API)
 - **Database & Cache**: PostgreSQL (via Prisma ORM), Redis (caching & job coordination)
-- **Vector Search**: Pinecone Vector DB, OpenAI Embeddings (`text-embedding-3-small`)
-- **LLM**: OpenAI GPT-4o / GPT-4o-mini
+- **Vector Search**: Pinecone Vector DB, Google Gemini Embeddings (`text-embedding-004`, 768 dim)
+- **LLM**: Google Gemini (`gemini-1.5-flash`)
 - **Containerization**: Docker & Docker Compose
 
 ---
@@ -51,7 +51,7 @@ An AI-powered full-stack assistant for analyzing, indexing, and conversing with 
 ### 1. Prerequisites
 - [Node.js](https://nodejs.org/) (v18+ recommended)
 - [Docker](https://www.docker.com/) & Docker Compose
-- API Keys for **OpenAI**, **GitHub Personal Access Token**, and **Pinecone**
+- API Keys for **Google Gemini**, **GitHub Personal Access Token**, and **Pinecone**
 
 ---
 
@@ -69,8 +69,8 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/github_assistant?sch
 # Redis
 REDIS_URL="redis://localhost:6379"
 
-# OpenAI
-OPENAI_API_KEY="your-openai-api-key"
+# Google Gemini
+GEMINI_API_KEY="your-gemini-api-key"
 
 # GitHub
 GITHUB_TOKEN="your-github-personal-access-token"

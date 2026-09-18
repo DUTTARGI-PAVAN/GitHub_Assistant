@@ -1,13 +1,20 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { getPineconeIndex } from '../config/pinecone.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'dummy-key',
-});
+const getApiKey = () => process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.OPENAI_API_KEY;
+
+const getGenAI = () => {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    console.warn('⚠️ GEMINI_API_KEY is not configured in environment variables');
+    return null;
+  }
+  return new GoogleGenerativeAI(apiKey);
+};
 
 /**
  * Splits repository code/markdown files into contextual chunks
@@ -42,19 +49,30 @@ export const chunkFiles = async (files) => {
 };
 
 /**
- * Generates vector embeddings using OpenAI text-embedding-3-small
+ * Generates vector embeddings using Google Gemini text-embedding-004 (768 dimensions)
  */
 export const createEmbeddings = async (texts) => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is required to generate embeddings.');
+  const genAI = getGenAI();
+  if (!genAI) {
+    throw new Error('GEMINI_API_KEY is required to generate embeddings.');
   }
 
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: texts,
-  });
+  const embeddingModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const batchSize = 100;
+  const allEmbeddings = [];
 
-  return response.data.map((item) => item.embedding);
+  for (let i = 0; i < texts.length; i += batchSize) {
+    const batch = texts.slice(i, i + batchSize);
+    const result = await embeddingModel.batchEmbedContents({
+      requests: batch.map((text) => ({
+        content: { parts: [{ text: text.slice(0, 8000) }] },
+      })),
+    });
+
+    result.embeddings.forEach((e) => allEmbeddings.push(e.values));
+  }
+
+  return allEmbeddings;
 };
 
 /**
@@ -88,12 +106,17 @@ export const indexRepoChunks = async (repositoryId, chunks) => {
 };
 
 /**
- * Queries Pinecone for relevant chunks and generates an AI answer
+ * Queries Pinecone for relevant chunks and generates an AI answer using Gemini
  */
 export const queryRepository = async ({ repositoryId, query, conversationHistory = [] }) => {
   const pineconeIndex = getPineconeIndex();
   if (!pineconeIndex) {
     throw new Error('Pinecone vector index is not available.');
+  }
+
+  const genAI = getGenAI();
+  if (!genAI) {
+    throw new Error('GEMINI_API_KEY is required to process chat queries.');
   }
 
   // 1. Generate embedding for user query
@@ -127,22 +150,32 @@ Relevant Repository Context:
 ${context || 'No specific repository chunks found matching this query.'}
 `;
 
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...conversationHistory.map((msg) => ({
-      role: msg.role === 'USER' ? 'user' : 'assistant',
-      content: msg.content,
-    })),
-    { role: 'user', content: query },
-  ];
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages,
-    temperature: 0.2,
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+    systemInstruction: systemPrompt,
   });
 
-  const answer = completion.choices[0]?.message?.content || 'Unable to generate response.';
+  // 4. Format conversation history for Gemini (roles: 'user' or 'model')
+  const contents = [
+    ...conversationHistory.map((msg) => ({
+      role: msg.role === 'USER' ? 'user' : 'model',
+      parts: [{ text: msg.content }],
+    })),
+    {
+      role: 'user',
+      parts: [{ text: query }],
+    },
+  ];
+
+  const result = await model.generateContent({
+    contents,
+    generationConfig: {
+      temperature: 0.2,
+    },
+  });
+
+  const response = await result.response;
+  const answer = response.text() || 'Unable to generate response.';
 
   return {
     answer,

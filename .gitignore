@@ -1,40 +1,66 @@
 # Dependencies
 node_modules/
+**/node_modules/
 .pnp
 .pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# Testing
-coverage/
+# Environment Variables & Secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+*.env
+**/.env
+**/.env.*
+!**/.env.example
 
-# Next.js build output
+# Production & Build Outputs
 .next/
+**/.next/
 out/
 build/
 dist/
+dist-ssr
+*.tsbuildinfo
+.turbo
 
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Debug logs
+# Debug & Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# IDE & OS files
+# Testing & Coverage
+coverage/
+.nyc_output/
+
+# IDE & Editor Files
 .vscode/
+!.vscode/extensions.json
 .idea/
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.sublime-project
+*.sublime-workspace
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Docker
+# Docker & Local Overrides
 docker-compose.override.yml
+*.local

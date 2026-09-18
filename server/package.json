@@ -13,7 +13,8 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@octokit/rest": "^20.1.1",
+    "@google/generative-ai": "^0.24.1",
+    "@octokit/rest": "^20.1.2",
     "@pinecone-database/pinecone": "^2.2.2",
     "@prisma/client": "^5.22.0",
     "cors": "^2.8.5",
